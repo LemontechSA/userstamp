@@ -79,15 +79,17 @@ module Ddb #:nodoc:
           self.deleter_attribute  = defaults[:deleter_attribute].to_sym
 
           class_eval do
-            belongs_to :creator, :class_name => self.stamper_class_name.to_s.singularize.camelize,
-                                 :foreign_key => self.creator_attribute
-                                 
-            belongs_to :updater, :class_name => self.stamper_class_name.to_s.singularize.camelize,
+            if !self.dangerous_attribute_method?('creator')
+              belongs_to :creator, :class_name => self.stamper_class_name.to_s.singularize.camelize,
+                                   :foreign_key => self.creator_attribute
+            end
+            if !self.dangerous_attribute_method?('updater')
+              belongs_to :updater, :class_name => self.stamper_class_name.to_s.singularize.camelize,
                                  :foreign_key => self.updater_attribute
-                                 
+            end
             before_save     :set_updater_attribute
             before_create   :set_creator_attribute
-                                 
+
             if defined?(Caboose::Acts::Paranoid)
               belongs_to :deleter, :class_name => self.stamper_class_name.to_s.singularize.camelize,
                                    :foreign_key => self.deleter_attribute
